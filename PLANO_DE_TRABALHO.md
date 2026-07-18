@@ -19,7 +19,7 @@ Referência completa dos requisitos: [`EXERCICIO.md`](./EXERCICIO.md). Este plan
 
 ## Fase 1 — Contextualização com IA
 
-- [ ] Pedir à IA uma exploração do código (`src/`, `prisma/schema.prisma`) para mapear: módulos existentes (auth, users, customers, products, orders), máquina de estados do pedido, controle de estoque, auditoria de mudanças de status, padrões de erro/exceções usados.
+- [x] Pedir à IA uma exploração do código (`src/`, `prisma/schema.prisma`) para mapear: módulos existentes (auth, users, customers, products, orders), máquina de estados do pedido, controle de estoque, auditoria de mudanças de status, padrões de erro/exceções usados.
 - [ ] Pedir à IA um resumo estruturado da transcrição, separando explicitamente:
   - decisões fechadas
   - requisitos funcionais explícitos
@@ -133,6 +133,14 @@ Passar item a item pela checklist de "Critérios de Aceite" do `EXERCICIO.md` (s
 - [ ] Conferir que o repositório está público.
 
 ---
+
+## Log de Atividades
+
+Registro cronológico das interações com a IA durante o desafio: quando, qual skill/prompt foi usado, e o que foi produzido. Serve de matéria-prima para as seções "Prompts customizados" e "Iterações e ajustes" do README (Fase 7).
+
+| Data/Hora | Skill/Prompt | Arguments |
+|---|---|---|
+| 2026-07-18 12:22 | `/analyze-codebase` | Pedir à IA uma exploração do código (`src/`, `prisma/schema.prisma`) para mapear: módulos existentes (auth, users, customers, products, orders), máquina de estados do pedido, controle de estoque, auditoria de mudanças de status, padrões de erro/exceções usados. |
 
 ## Notas de processo
 
