@@ -20,7 +20,7 @@ Referência completa dos requisitos: [`EXERCICIO.md`](./EXERCICIO.md). Este plan
 ## Fase 1 — Contextualização com IA
 
 - [x] Pedir à IA uma exploração do código (`src/`, `prisma/schema.prisma`) para mapear: módulos existentes (auth, users, customers, products, orders), máquina de estados do pedido, controle de estoque, auditoria de mudanças de status, padrões de erro/exceções usados.
-- [ ] Pedir à IA um resumo estruturado da transcrição, separando explicitamente:
+- [x] Pedir à IA um resumo estruturado da transcrição, separando explicitamente:
   - decisões fechadas
   - requisitos funcionais explícitos
   - restrições
@@ -28,7 +28,7 @@ Referência completa dos requisitos: [`EXERCICIO.md`](./EXERCICIO.md). Este plan
   - itens descartados
   - itens adiados para fases futuras
   - detalhes técnicos secundários
-- [ ] Revisar esse resumo manualmente contra a transcrição — é a base de tudo que vem depois. Erros aqui se propagam para todos os documentos.
+- [x] Revisar esse resumo manualmente contra a transcrição — é a base de tudo que vem depois. Erros aqui se propagam para todos os documentos.
 
 ## Fase 2 — ADRs primeiro (esqueleto das decisões)
 
@@ -141,6 +141,7 @@ Registro cronológico das interações com a IA durante o desafio: quando, qual 
 | Data/Hora | Skill/Prompt | Arguments |
 |---|---|---|
 | 2026-07-18 12:22 | `/analyze-codebase` | Pedir à IA uma exploração do código (`src/`, `prisma/schema.prisma`) para mapear: módulos existentes (auth, users, customers, products, orders), máquina de estados do pedido, controle de estoque, auditoria de mudanças de status, padrões de erro/exceções usados. |
+| 2026-07-18 12:43 | `/summarize-meeting-transcript` | resumo estruturado da transcrição, separando explicitamente: decisões fechadas, requisitos funcionais explícitos, restrições, pontos de integração com código existente, itens descartados, itens adiados para fases futuras, detalhes técnicos secundários. |
 
 ## Notas de processo
 

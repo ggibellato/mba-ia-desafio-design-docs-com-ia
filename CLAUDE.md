@@ -60,13 +60,3 @@ If these conditions are not met, the skill should treat the attempt as failed an
 
 - Regenerate the document correctly, or  
 - Ask for clarification while still respecting these global rules.
-
-***
-
-Key changes from your draft:
-
-- Removed the contradiction between “must be written in Brazilian Portuguese” and “unless specific requested by the user” by making Portuguese the default and “explicit request” the override.
-- Fixed a few typos and small grammar issues (for example, “specific requested” → “explicitly requests”; “unbigous” implied in earlier messages).
-- Clarified that “minimum structure” is defined in each skill file, since you moved those details out of `CLAUDE.md`.
-
-If you want, next step can be to draft a very thin `PRD.skill.md` that just defines the minimal sections and explicitly “imports” this `CLAUDE.md` as its governing rules.
