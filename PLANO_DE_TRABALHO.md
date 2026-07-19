@@ -55,15 +55,15 @@ Checklist do conjunto:
 
 ## Fase 3 — RFC (`docs/RFC.md`)
 
-- [ ] Metadados: autor, status, data, revisores (usar os 5 participantes da reunião como revisores).
-- [ ] Resumo executivo (TL;DR).
-- [ ] Contexto e problema.
-- [ ] Proposta técnica (visão geral, sem repetir nível de detalhe do FDD).
-- [ ] Alternativas consideradas: **≥2** alternativas reais descartadas na reunião, cada uma com o trade-off que motivou o descarte.
-- [ ] Questões em aberto: **≥2** pontos levantados e não decididos/adiados na reunião.
-- [ ] Impacto e riscos.
-- [ ] Decisões relacionadas: links para os ADRs já escritos na Fase 2.
-- [ ] Conferir tamanho: 2 a 4 páginas — se estiver mais longo, provavelmente há detalhe demais de implementação (isso pertence ao FDD).
+- [x] Metadados: autor, status, data, revisores (Larissa como autora; os outros 4 participantes da reunião como revisores).
+- [x] Resumo executivo (TL;DR).
+- [x] Contexto e problema.
+- [x] Proposta técnica (visão geral, sem repetir nível de detalhe do FDD).
+- [x] Alternativas consideradas: **≥2** alternativas reais descartadas na reunião, cada uma com o trade-off que motivou o descarte. (4 alternativas)
+- [x] Questões em aberto: **≥2** pontos levantados e não decididos/adiados na reunião. (4 questões)
+- [x] Impacto e riscos.
+- [x] Decisões relacionadas: links para os ADRs já escritos na Fase 2. (7 ADRs linkados)
+- [x] Conferir tamanho: 2 a 4 páginas — se estiver mais longo, provavelmente há detalhe demais de implementação (isso pertence ao FDD). (~1.640 palavras, ~3 páginas)
 
 ## Fase 4 — FDD (`docs/FDD.md`)
 
@@ -143,6 +143,7 @@ Registro cronológico das interações com a IA durante o desafio: quando, qual 
 | 2026-07-18 12:22 | `/analyze-codebase` | Pedir à IA uma exploração do código (`src/`, `prisma/schema.prisma`) para mapear: módulos existentes (auth, users, customers, products, orders), máquina de estados do pedido, controle de estoque, auditoria de mudanças de status, padrões de erro/exceções usados. |
 | 2026-07-18 12:43 | `/summarize-meeting-transcript` | resumo estruturado da transcrição, separando explicitamente: decisões fechadas, requisitos funcionais explícitos, restrições, pontos de integração com código existente, itens descartados, itens adiados para fases futuras, detalhes técnicos secundários. |
 | 2026-07-19 08:29 | `/write-adrs` | This is an MBA assignment.<br><br>Your goal is to write the Architecture Decision Records (ADRs) required by the exercise.<br><br>Use the following documents in order of priority:<br><br>1. `EXERCICIO.md` — Defines the assignment requirements and grading criteria. Your ADRs must satisfy all of these requirements.<br>3. `RESUMO_TRANSCRICAO.md` — A summary of the transcription that can be used for navigation and context, but defer to `TRANSCRIPTION.md` whenever there is any ambiguity.<br>2. `TRANSCRIPTION.md` — The primary source of truth for the architectural decisions discussed. Do not invent decisions that are not supported by this document.<br>4. `ANALIZE_CODEBASE.md` — Provides additional context about the implementation and codebase. Use it to validate and enrich the ADRs where appropriate, but do not let it override the decisions documented in the transcription.<br><br>When writing the ADRs:<br>- Act as the software architect who participated in these decisions and is documenting them after the fact.<br>- Write professional ADRs that reflect real engineering decision-making, not an academic exercise.<br>- Ensure every ADR is traceable to evidence in the transcription or the codebase analysis.<br>- Do not fabricate rationale, alternatives, or consequences that are unsupported by the available information. If information is missing, explicitly state the assumption or limitation.<br>- The final output should read as production-quality architecture documentation while fully satisfying the exercise requirements. |
+| 2026-07-19 10:51 | `/write-rfc` | This is an MBA assignment.<br><br>Your goal is to write the Request for Comments (RFC) required by the exercise.<br><br>Use the following documents in order of priority:<br><br>1. `EXERCICIO.md` — Defines the assignment requirements and grading criteria. The RFC must satisfy all of these requirements.<br>2. `TRANSCRIPTION.md` — The primary source of truth for the problem, context, discussions, and architectural reasoning. Do not invent information that is not supported by this document.<br>3. `RESUMO_TRANSCRICAO.md` — A summary of the transcription for quick reference. If there is any conflict or ambiguity, `TRANSCRIPTION.md` takes precedence.<br>4. `ADR-XXX-*.md` — The Architecture Decision Records that document the architectural decisions already made. Use them as the authoritative source for approved decisions.<br>5. `ANALIZE_CODEBASE.md` — Provides additional context about the existing implementation and codebase. Use it to validate and enrich the RFC where appropriate, but do not let it override the transcription or the ADRs.<br><br>When writing the RFC:<br>- Act as the software architect proposing the solution and requesting feedback from other engineers and stakeholders before implementation.<br>- Write a professional engineering RFC, not an academic report.<br>- Clearly explain the problem being solved, the proposed solution, the motivation behind it, the trade-offs considered, and the impact on the system.<br>- Use the ADRs as established architectural decisions. The RFC should build upon them rather than redefine them.<br>- Keep the discussion at the architectural level. Focus on **what** is being proposed and **why**, not **how** it will be implemented.<br>- Do not duplicate the level of implementation detail found in the FDD or other design documents.<br>- Do not fabricate rationale, alternatives, or consequences that are unsupported by the available information. If information is missing, explicitly state the assumption or limitation.<br>- The final document should read as a production-quality RFC that could be circulated internally for review and feedback. |
 
 ## Notas de processo
 
