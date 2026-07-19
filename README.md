@@ -16,6 +16,7 @@ Usei três IAs diferentes, cada uma com um papel específico no pipeline — dec
 - **ChatGPT** (https://chatgpt.com/) — usado para **organizar o prompt de execução** antes de rodar cada skill. Com prompts simples, montava e revisava o texto que depois seria colado como argumento do slash command no Claude (ordem de prioridade das fontes, regras específicas do desafio), garantindo que o pedido para o Claude chegasse já estruturado.
 - **Claude Code** (CLI agêntico, rodando Claude Sonnet 5) — ferramenta de **execução final**. Recebe a skill (vinda do Perplexity) e o prompt já organizado (vindo do ChatGPT) como argumento do slash command, lê a transcrição e o código-fonte diretamente do repositório, executa comandos de shell para verificar fatos (`grep`, `find`, leitura de arquivos com números de linha) antes de citá-los nos documentos, produz o arquivo final, e geriu todo o fluxo de branches/commits/PRs via `gh` CLI.
 - **`CLAUDE.md`** na raiz do repositório — funciona como um "prompt de sistema" do projeto: força saída em português brasileiro por padrão, define estilo de escrita e a ordem de precedência das regras, e vale para todas as skills executadas pelo Claude Code.
+- **Claude Haiku 4.5** — usado numa sessão separada do Claude Code só para a revisão final (Fase 8), como uma segunda opinião independente. Deliberadamente um modelo diferente do que gerou os documentos (Sonnet), para não reaproveitar o mesmo contexto/viés de quem escreveu o conteúdo original ao checar se ele está correto.
 
 ## Workflow adotado
 
@@ -27,7 +28,16 @@ Usei três IAs diferentes, cada uma com um papel específico no pipeline — dec
 
 **Pipeline de 3 IAs para cada um desses documentos.** Para ADRs, RFC, Tracker, FDD e PRD, usei o mesmo processo de 3 etapas descrito em "Ferramentas de IA utilizadas": Perplexity desenha/ajusta a skill, ChatGPT organiza o prompt de execução, Claude Code roda a skill com esse prompt e produz o arquivo.
 
-**Fases finais (README e revisão) — abordagem mais direta.** A partir do README.md (Fase 7) e da revisão final contra os critérios de aceite (Fase 8), não criei skills novas nem passei pelo pipeline Perplexity/ChatGPT — pedi essas etapas direto no Claude Code, com prompts simples descrevendo cada checklist. Fazia sentido nesse ponto: essas fases consolidam e revisam o que já existe, não geram um novo tipo de documento estruturado que justificasse uma skill reutilizável.
+**Fases finais (README e revisão) — abordagem mais direta.** A partir do README.md (Fase 7), não criei skills novas nem passei pelo pipeline Perplexity/ChatGPT — pedi essas etapas direto no Claude Code, com prompts simples descrevendo cada checklist. Fazia sentido nesse ponto: essas fases consolidam e revisam o que já existe, não geram um novo tipo de documento estruturado que justificasse uma skill reutilizável.
+
+**Fase 8 — revisão final num modelo diferente.** Para o check final contra os critérios de aceite do `EXERCICIO.md`, abri uma sessão separada do Claude Code e troquei para o **Claude Haiku 4.5** em vez do Sonnet usado no resto do processo — de propósito, para ter uma segunda opinião vinda de um modelo que não tinha "escrito" nenhum dos documentos e não carregava o contexto/viés de quem os produziu. O prompt usado nessa sessão:
+
+```
+I need you got on the file PLANO_DE_TRABAHO.md at the session Fase 8, and execute the verification if everything
+that the EXERCICIO.md request is covered in the correct format.
+
+This is the sinal check before I submit my asignemt for this subject at my MBA
+```
 
 Cada etapa virou um commit em uma branch própria e um Pull Request revisado antes do merge — nunca commitei direto em `main`:
 
