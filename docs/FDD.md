@@ -111,7 +111,7 @@ Local: `src/modules/orders/order.service.ts`, dentro de `OrderService.changeStat
    c. Para cada webhook casado, monta o payload (ver "Contratos Públicos > Payload de Webhook")
       e insere um WebhookOutboxEvent com status = "PENDING", attempts = 0,
       nextAttemptAt = now().
-4. Se o passo 3 lançar uma exceção, toda a transação (incluindo a mudança de status) sofre rollback —
+4. Se o passo 3 der throw, toda a transação (incluindo a mudança de status) sofre rollback —
    é exatamente essa garantia que motiva o Outbox (ADR-001).
 ```
 
