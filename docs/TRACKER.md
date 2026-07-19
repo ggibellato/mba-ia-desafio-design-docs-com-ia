@@ -1,8 +1,8 @@
 # Tracker de Rastreabilidade
 
-Mapeia cada item registrado nos documentos do pacote (ADRs, RFC e, à medida que forem escritos, FDD e PRD) à sua origem na transcrição (`TRANSCRICAO.md`) ou no código (`src/`, `prisma/`).
+Mapeia cada item registrado nos documentos do pacote (ADRs, RFC, FDD e PRD) à sua origem na transcrição (`TRANSCRICAO.md`) ou no código (`src/`, `prisma/`).
 
-> **Nota de cobertura (2026-07-19):** `docs/PRD.md` ainda é um placeholder (Fase 5 do `PLANO_DE_TRABALHO.md`). Este tracker cobre 100% dos itens identificáveis atualmente existentes — os 7 ADRs (`docs/adrs/`), o RFC (`docs/RFC.md`) e o FDD (`docs/FDD.md`) — e será estendido com novas linhas assim que o PRD for produzido, sem remover as linhas já existentes.
+> **Nota de cobertura (2026-07-19):** Pacote de documentos completo — os 7 ADRs (`docs/adrs/`), o RFC (`docs/RFC.md`), o FDD (`docs/FDD.md`) e o PRD (`docs/PRD.md`). Este tracker cobre 100% dos itens identificáveis nesses documentos.
 
 | ID | Documento | Tipo | Conteúdo (resumo) | Fonte | Localização |
 | --- | --- | --- | --- | --- | --- |
@@ -79,3 +79,32 @@ Mapeia cada item registrado nos documentos do pacote (ADRs, RFC e, à medida que
 | FDD-INTEGRACAO-07 | docs/FDD.md | Integração com Código | `redactPaths` do logger precisa ganhar entrada para o campo `secret` do webhook | CODIGO | src/shared/logger/index.ts |
 | FDD-INTEGRACAO-08 | docs/FDD.md | Integração com Código | Padrão de bootstrap de `src/server.ts` (PrismaClient próprio, shutdown gracioso) replicado em `src/worker.ts` | CODIGO | src/server.ts |
 | FDD-INTEGRACAO-09 | docs/FDD.md | Integração com Código | Quatro modelos novos (`Webhook`, `WebhookOutboxEvent`, `WebhookDelivery`, `WebhookDeadLetter`) adicionados sem alterar modelos existentes | CODIGO | prisma/schema.prisma |
+| PRD-OBJ-01 | docs/PRD.md | Objetivo/Métrica | Latência p95 de entrega ≤ 10s, refletindo a definição de "tempo real" dos clientes | TRANSCRICAO | [09:02] Marcos |
+| PRD-OBJ-02 | docs/PRD.md | Objetivo/Métrica | Entrega da feature até o fim do trimestre para reter o cliente Atlas Comercial | TRANSCRICAO | [09:00] Marcos |
+| PRD-FR-01 | docs/PRD.md | Requisito Funcional | Sistema deve notificar automaticamente clientes na mudança de status, eliminando polling manual | TRANSCRICAO | [09:02] Marcos |
+| PRD-FR-02 | docs/PRD.md | Requisito Funcional | Cadastro de webhook via POST (url + status desejados), secret gerada e devolvida na criação | TRANSCRICAO | [09:31] Marcos |
+| PRD-FR-03 | docs/PRD.md | Requisito Funcional | Edição, remoção e listagem de webhooks cadastrados | TRANSCRICAO | [09:33] Bruno |
+| PRD-FR-04 | docs/PRD.md | Requisito Funcional | Filtro de quais status de pedido cada webhook deseja receber | TRANSCRICAO | [09:33–09:34] Bruno |
+| PRD-FR-05 | docs/PRD.md | Requisito Funcional | Consulta ao histórico das entregas mais recentes de um webhook | TRANSCRICAO | [09:34] Marcos |
+| PRD-FR-06 | docs/PRD.md | Requisito Funcional | URL do webhook deve ser https; URLs não seguras são rejeitadas | TRANSCRICAO | [09:23] Sofia |
+| PRD-FR-07 | docs/PRD.md | Requisito Funcional | Rotação de secret via API, sem interromper validação em trânsito | TRANSCRICAO | [09:21] Sofia |
+| PRD-FR-08 | docs/PRD.md | Requisito Funcional | Assinatura HMAC-SHA256 em cada notificação enviada | TRANSCRICAO | [09:19–09:20] Sofia |
+| PRD-FR-09 | docs/PRD.md | Requisito Funcional | Reentrega automática com backoff antes de considerar falha definitiva | TRANSCRICAO | [09:15] Diego |
+| PRD-FR-10 | docs/PRD.md | Requisito Funcional | Eventos esgotados ficam consultáveis (DLQ) e reprocessáveis por ADMIN | TRANSCRICAO | [09:18–09:19] Diego |
+| PRD-FR-11 | docs/PRD.md | Requisito Funcional | Garantia at-least-once com identificador único por evento para dedup do cliente | TRANSCRICAO | [09:24–09:26] Diego |
+| PRD-NFR-01 | docs/PRD.md | Requisito Não Funcional | Latência de entrega: p95 até 10s, pior caso ~12s | TRANSCRICAO | [09:02] Marcos |
+| PRD-NFR-02 | docs/PRD.md | Requisito Não Funcional | Nenhum evento perdido silenciosamente — sempre observável e reprocessável | TRANSCRICAO | [09:18] Diego |
+| PRD-NFR-03 | docs/PRD.md | Requisito Não Funcional | Apenas URLs https são aceitas para webhooks | TRANSCRICAO | [09:23] Sofia |
+| PRD-NFR-04 | docs/PRD.md | Requisito Não Funcional | Secret anterior válida por 24h após rotação (grace period) | TRANSCRICAO | [09:21] Sofia |
+| PRD-NFR-05 | docs/PRD.md | Requisito Não Funcional | Payload de notificação limitado a 64KB, erro explícito se ultrapassar | TRANSCRICAO | [09:23–09:24] Sofia |
+| PRD-NFR-06 | docs/PRD.md | Requisito Não Funcional | Reprocessamento manual de DLQ deve ficar auditável (quem executou) | TRANSCRICAO | [09:35–09:36] Sofia |
+| PRD-ESCOPO-01 | docs/PRD.md | Restrição | Fora de escopo: rate limiting de envio ao cliente | TRANSCRICAO | [09:38–09:39] Diego |
+| PRD-ESCOPO-02 | docs/PRD.md | Restrição | Fora de escopo: notificação (ex.: e-mail) sobre falhas recorrentes | TRANSCRICAO | [09:37–09:38] Larissa |
+| PRD-ESCOPO-03 | docs/PRD.md | Restrição | Fora de escopo: dashboard/painel visual de webhooks para o cliente | TRANSCRICAO | [09:39–09:40] Larissa |
+| PRD-ESCOPO-04 | docs/PRD.md | Restrição | Fora de escopo: arquivamento de eventos já entregues na outbox | TRANSCRICAO | [09:08] Diego |
+| PRD-ESCOPO-05 | docs/PRD.md | Restrição | Fora de escopo: escalar o worker para múltiplos processos em paralelo | TRANSCRICAO | [09:13] Diego |
+| PRD-RISCO-01 | docs/PRD.md | Risco | Vazamento de secret de cliente (já ocorreu antes) | TRANSCRICAO | [09:22] Diego |
+| PRD-RISCO-02 | docs/PRD.md | Risco | Cliente não implementa corretamente HMAC ou deduplicação | TRANSCRICAO | [09:25] Sofia |
+| PRD-RISCO-03 | docs/PRD.md | Risco | Gargalo de throughput por depender de worker único | TRANSCRICAO | [09:13] Diego |
+| PRD-RISCO-04 | docs/PRD.md | Risco | Crescimento não controlado da tabela de eventos | TRANSCRICAO | [09:08] Diego |
+| PRD-RISCO-05 | docs/PRD.md | Risco | Falha de cliente sem detecção por até ~15 horas | TRANSCRICAO | [09:16–09:17] Diego |
