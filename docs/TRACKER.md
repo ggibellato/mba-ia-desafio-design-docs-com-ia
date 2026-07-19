@@ -2,7 +2,7 @@
 
 Mapeia cada item registrado nos documentos do pacote (ADRs, RFC e, à medida que forem escritos, FDD e PRD) à sua origem na transcrição (`TRANSCRICAO.md`) ou no código (`src/`, `prisma/`).
 
-> **Nota de cobertura (2026-07-19):** `docs/PRD.md` e `docs/FDD.md` ainda são placeholders (Fases 4 e 5 do `PLANO_DE_TRABALHO.md`). Este tracker cobre 100% dos itens identificáveis atualmente existentes — os 7 ADRs (`docs/adrs/`) e o RFC (`docs/RFC.md`) — e será estendido com novas linhas assim que o FDD e o PRD forem produzidos, sem remover as linhas já existentes.
+> **Nota de cobertura (2026-07-19):** `docs/PRD.md` ainda é um placeholder (Fase 5 do `PLANO_DE_TRABALHO.md`). Este tracker cobre 100% dos itens identificáveis atualmente existentes — os 7 ADRs (`docs/adrs/`), o RFC (`docs/RFC.md`) e o FDD (`docs/FDD.md`) — e será estendido com novas linhas assim que o PRD for produzido, sem remover as linhas já existentes.
 
 | ID | Documento | Tipo | Conteúdo (resumo) | Fonte | Localização |
 | --- | --- | --- | --- | --- | --- |
@@ -54,3 +54,28 @@ Mapeia cada item registrado nos documentos do pacote (ADRs, RFC e, à medida que
 | RFC-RISK-03 | docs/RFC.md | Risco | Crescimento não controlado da tabela `webhook_outbox`; arquivamento de eventos entregues ficou fora do escopo desta feature | TRANSCRICAO | [09:08] Diego |
 | RFC-RISK-04 | docs/RFC.md | Risco | Cliente pode não implementar corretamente a verificação HMAC ou a deduplicação por `X-Event-Id` | TRANSCRICAO | [09:25] Sofia |
 | RFC-RISK-05 | docs/RFC.md | Risco | Latência de até ~15 horas até uma falha ser definitivamente classificada como permanente | TRANSCRICAO | [09:16–09:17] Diego |
+| FDD-FLUXO-01 | docs/FDD.md | Fluxo | Publicação do evento na outbox dentro da mesma transação de `OrderService.changeStatus` | TRANSCRICAO | [09:40] Bruno |
+| FDD-FLUXO-02 | docs/FDD.md | Fluxo | Worker processa eventos pendentes em lote, em polling de 2 segundos | TRANSCRICAO | [09:09] Diego |
+| FDD-FLUXO-03 | docs/FDD.md | Fluxo | Retry com backoff exponencial de 5 tentativas (1m/5m/30m/2h/12h) | TRANSCRICAO | [09:17] Diego |
+| FDD-FLUXO-04 | docs/FDD.md | Fluxo | Evento esgotado vai para `WebhookDeadLetter`; reprocessamento manual via endpoint admin | TRANSCRICAO | [09:18] Diego |
+| FDD-CONTRATO-01 | docs/FDD.md | Contrato | `POST /api/v1/webhooks` — cadastro de webhook, secret gerada e devolvida na criação | TRANSCRICAO | [09:31] Marcos |
+| FDD-CONTRATO-02 | docs/FDD.md | Contrato | `GET /api/v1/webhooks` — listagem paginada dos webhooks de um customer | TRANSCRICAO | [09:33] Bruno |
+| FDD-CONTRATO-03 | docs/FDD.md | Contrato | `PATCH /api/v1/webhooks/:id` — edição de url/eventos/status ativo | TRANSCRICAO | [09:33] Bruno |
+| FDD-CONTRATO-04 | docs/FDD.md | Contrato | `DELETE /api/v1/webhooks/:id` — remoção de webhook | TRANSCRICAO | [09:33] Bruno |
+| FDD-CONTRATO-05 | docs/FDD.md | Contrato | `POST /api/v1/webhooks/:id/secret/rotate` — rotação de secret com grace period de 24h | TRANSCRICAO | [09:21] Sofia |
+| FDD-CONTRATO-06 | docs/FDD.md | Contrato | `GET /api/v1/webhooks/:id/deliveries` — histórico das últimas entregas (sucesso/falha, payload, response, tempo de resposta) | TRANSCRICAO | [09:34] Marcos |
+| FDD-CONTRATO-07 | docs/FDD.md | Contrato | `POST /api/v1/admin/webhooks/dead-letter/:id/replay` — replay manual de evento da DLQ, role ADMIN | TRANSCRICAO | [09:18] Diego |
+| FDD-ERRO-01 | docs/FDD.md | Restrição | Código de erro `WEBHOOK_NOT_FOUND` | TRANSCRICAO | [09:28] Bruno |
+| FDD-ERRO-02 | docs/FDD.md | Restrição | Código de erro `WEBHOOK_INVALID_URL` | TRANSCRICAO | [09:28] Bruno |
+| FDD-ERRO-03 | docs/FDD.md | Restrição | Código de erro `WEBHOOK_SECRET_REQUIRED` | TRANSCRICAO | [09:28] Bruno |
+| FDD-ERRO-04 | docs/FDD.md | Restrição | Código de erro `WEBHOOK_PAYLOAD_TOO_LARGE`, payload de entrega limitado a 64KB | TRANSCRICAO | [09:23] Sofia |
+| FDD-ERRO-05 | docs/FDD.md | Restrição | Código de erro `WEBHOOK_DELIVERY_TIMEOUT`, timeout de 10s por chamada HTTP de entrega | TRANSCRICAO | [09:42] Diego |
+| FDD-INTEGRACAO-01 | docs/FDD.md | Integração com Código | `OrderService.changeStatus` estendido para chamar `publishWebhookEvent(tx, ...)` | CODIGO | src/modules/orders/order.service.ts |
+| FDD-INTEGRACAO-02 | docs/FDD.md | Integração com Código | `buildControllers` ganha `WebhookRepository`/`WebhookService`/`WebhookController`, mesmo padrão de `orders` | CODIGO | src/app.ts |
+| FDD-INTEGRACAO-03 | docs/FDD.md | Integração com Código | `buildApiRouter` ganha `router.use('/webhooks', ...)` e `router.use('/admin/webhooks', ...)` | CODIGO | src/routes/index.ts |
+| FDD-INTEGRACAO-04 | docs/FDD.md | Integração com Código | Novas classes de erro `WEBHOOK_*` estendem `AppError`, no molde de `InsufficientStockError`/`InvalidStatusTransitionError` | CODIGO | src/shared/errors/http-errors.ts |
+| FDD-INTEGRACAO-05 | docs/FDD.md | Integração com Código | `requireRole('ADMIN')` reaproveitado sem alteração no endpoint de replay de DLQ | CODIGO | src/middlewares/auth.middleware.ts |
+| FDD-INTEGRACAO-06 | docs/FDD.md | Integração com Código | `paginated()` reaproveitado sem alteração em `GET /webhooks` e `GET /webhooks/:id/deliveries` | CODIGO | src/shared/http/response.ts |
+| FDD-INTEGRACAO-07 | docs/FDD.md | Integração com Código | `redactPaths` do logger precisa ganhar entrada para o campo `secret` do webhook | CODIGO | src/shared/logger/index.ts |
+| FDD-INTEGRACAO-08 | docs/FDD.md | Integração com Código | Padrão de bootstrap de `src/server.ts` (PrismaClient próprio, shutdown gracioso) replicado em `src/worker.ts` | CODIGO | src/server.ts |
+| FDD-INTEGRACAO-09 | docs/FDD.md | Integração com Código | Quatro modelos novos (`Webhook`, `WebhookOutboxEvent`, `WebhookDelivery`, `WebhookDeadLetter`) adicionados sem alterar modelos existentes | CODIGO | prisma/schema.prisma |
