@@ -34,24 +34,24 @@ Referência completa dos requisitos: [`EXERCICIO.md`](./EXERCICIO.md). Este plan
 
 As 6 decisões principais que a reunião discute (cobrir pelo menos 5 delas):
 
-- [ ] ADR — Padrão Outbox no MySQL
-- [ ] ADR — Política de retry com backoff e DLQ
-- [ ] ADR — Autenticação HMAC-SHA256 com secret por endpoint
-- [ ] ADR — Garantia at-least-once com `X-Event-Id`
-- [ ] ADR — Worker em processo separado em polling
-- [ ] ADR — Reuso dos padrões existentes do projeto
+- [x] ADR — Padrão Outbox no MySQL (`ADR-001-outbox-no-mysql.md`)
+- [x] ADR — Política de retry com backoff e DLQ (`ADR-003-retry-com-backoff-exponencial-e-dead-letter-queue.md`)
+- [x] ADR — Autenticação HMAC-SHA256 com secret por endpoint (`ADR-004-autenticacao-hmac-sha256-com-secret-por-endpoint.md`)
+- [x] ADR — Garantia at-least-once com `X-Event-Id` (`ADR-005-garantia-at-least-once-com-x-event-id.md`)
+- [x] ADR — Worker em processo separado em polling (`ADR-002-worker-em-processo-separado-com-polling.md`)
+- [x] ADR — Reuso dos padrões existentes do projeto (`ADR-006-reuso-dos-padroes-existentes-do-projeto.md`)
 
 Para cada ADR criado em `docs/adrs/ADR-NNN-titulo-em-kebab-case.md`:
-- [ ] Seção Status
-- [ ] Seção Contexto (rastreável à transcrição)
-- [ ] Seção Decisão
-- [ ] Seção Alternativas Consideradas (≥1 alternativa real ou plausível)
-- [ ] Seção Consequências (positivas e negativas, trade-off explícito)
+- [x] Seção Status
+- [x] Seção Contexto (rastreável à transcrição)
+- [x] Seção Decisão
+- [x] Seção Alternativas Consideradas (≥1 alternativa real ou plausível)
+- [x] Seção Consequências (positivas e negativas, trade-off explícito)
 
 Checklist do conjunto:
-- [ ] Entre 5 e 8 arquivos ADR no total.
-- [ ] Pelo menos 1 ADR referencia arquivos/módulos/classes reais do código (ex: `order.service.ts`, máquina de estados, classes de erro existentes).
-- [ ] Decisões técnicas secundárias (formato de payload, timeouts, headers) — decidir se viram ADR extra ou ficam só no FDD.
+- [x] Entre 5 e 8 arquivos ADR no total. (7 arquivos: os 6 acima + `ADR-007-ordering-por-order-id-em-topologia-single-worker.md`, cobrindo a garantia de ordering discutida na reunião)
+- [x] Pelo menos 1 ADR referencia arquivos/módulos/classes reais do código (`order.service.ts`, `server.ts`, `app-error.ts`, `error.middleware.ts`, `auth.middleware.ts` — referenciados em ADR-001, 002, 003 e 006, todos confirmados existentes).
+- [x] Decisões técnicas secundárias (formato de payload, timeouts, headers) — decidido: ficam só no FDD, não viram ADR extra (TLS obrigatório e limite de 64KB foram classificados por Larissa na própria reunião `[09:24]` como requisito não funcional, não decisão arquitetural).
 
 ## Fase 3 — RFC (`docs/RFC.md`)
 
@@ -142,6 +142,7 @@ Registro cronológico das interações com a IA durante o desafio: quando, qual 
 |---|---|---|
 | 2026-07-18 12:22 | `/analyze-codebase` | Pedir à IA uma exploração do código (`src/`, `prisma/schema.prisma`) para mapear: módulos existentes (auth, users, customers, products, orders), máquina de estados do pedido, controle de estoque, auditoria de mudanças de status, padrões de erro/exceções usados. |
 | 2026-07-18 12:43 | `/summarize-meeting-transcript` | resumo estruturado da transcrição, separando explicitamente: decisões fechadas, requisitos funcionais explícitos, restrições, pontos de integração com código existente, itens descartados, itens adiados para fases futuras, detalhes técnicos secundários. |
+| 2026-07-19 08:29 | `/write-adrs` | Escrever os ADRs exigidos pelo desafio, usando `EXERCICIO.md`, `RESUMO_TRANSCRICAO.md`, `TRANSCRICAO.md` e `ANALIZE_CODEBASE.md` em ordem de prioridade, sem inventar decisões, alternativas ou consequências não suportadas pelas fontes. |
 
 ## Notas de processo
 
