@@ -19,21 +19,21 @@ Usei três IAs diferentes, cada uma com um papel específico no pipeline — dec
 
 ## Workflow adotado
 
-Segui a ordem sugerida no enunciado (ADRs → RFC → FDD → PRD → Tracker → README). Antes de cada skill ser executada, o pedido passava por um pipeline de 3 etapas, cada uma em uma IA diferente (ver "Ferramentas de IA utilizadas" acima):
+**Passo 0 — plano de trabalho antes de qualquer documento.** O primeiro pedido que fiz à IA não foi um documento do pacote, foi o `PLANO_DE_TRABALHO.md` (não é entregável do desafio): um roteiro fase a fase, com checklist do que já estava feito e uma tabela "Log de Atividades" registrando, para cada invocação de skill, o horário e o prompt exato usado. Foi o que tornou possível reconstruir com precisão as seções deste README.
 
-1. **Perplexity** desenha/ajusta a skill correspondente ao documento (ex.: `write-prd`).
-2. **ChatGPT** organiza o prompt de execução daquela skill para este desafio específico.
-3. **Claude Code** recebe o prompt organizado como argumento do slash command (`/write-prd ...`) e produz o arquivo.
+**Contextualização (Fase 1).** Em seguida gerei `ANALIZE_CODEBASE.md` (skill `analyze-codebase`) e `RESUMO_TRANSCRICAO.md` (skill `summarize-meeting-transcript`). A intenção do resumo era ter uma forma reduzida da transcrição para referência rápida, mantendo `TRANSCRICAO.md` como fonte da verdade em caso de dúvida ou ambiguidade. Na prática, isso não deu muito fruto: os prompts usados para executar as skills seguintes sempre listavam `TRANSCRICAO.md` como fonte principal, e o resumo acabou funcionando mais como material de apoio para eu revisar manualmente do que como algo que a IA de fato priorizou.
 
-Além desse pipeline, usei duas adaptações práticas:
+**ADRs → RFC → Tracker → FDD → PRD, com um desvio deliberado da ordem sugerida.** Segui a ordem do enunciado (ADRs, depois RFC, depois FDD e PRD), com uma exceção: construí o Tracker logo depois do RFC, antes do FDD — o enunciado sugere montá-lo em paralelo ou só no fim. Decidi adiantar porque achei que saber o que já estava documentado/rastreado ajudaria a geração dos documentos seguintes (FDD e PRD), em vez de descobrir só depois lacunas de rastreabilidade que exigiriam retrabalho nos dois.
 
-1. **Um plano de trabalho pessoal** (`PLANO_DE_TRABALHO.md`, não é entregável do desafio) — um roteiro fase a fase com checklist e uma tabela "Log de Atividades" registrando, para cada invocação de skill, o horário e o prompt exato usado. Foi o que tornou possível reconstruir com precisão as seções abaixo.
-2. **Tracker construído incrementalmente, não só no fim** — em vez de varrer todos os documentos prontos de uma vez, atualizei `docs/TRACKER.md` a cada novo documento: ADRs + RFC juntos (48 linhas), depois FDD (+25 → 73), depois PRD (+29 → 102 no total), o que expôs cedo qualquer afirmação sem origem clara.
+**Pipeline de 3 IAs para cada um desses documentos.** Para ADRs, RFC, Tracker, FDD e PRD, usei o mesmo processo de 3 etapas descrito em "Ferramentas de IA utilizadas": Perplexity desenha/ajusta a skill, ChatGPT organiza o prompt de execução, Claude Code roda a skill com esse prompt e produz o arquivo.
+
+**Fases finais (README e revisão) — abordagem mais direta.** A partir do README.md (Fase 7) e da revisão final contra os critérios de aceite (Fase 8), não criei skills novas nem passei pelo pipeline Perplexity/ChatGPT — pedi essas etapas direto no Claude Code, com prompts simples descrevendo cada checklist. Fazia sentido nesse ponto: essas fases consolidam e revisam o que já existe, não geram um novo tipo de documento estruturado que justificasse uma skill reutilizável.
 
 Cada etapa virou um commit em uma branch própria e um Pull Request revisado antes do merge — nunca commitei direto em `main`:
 
 | PR | Conteúdo |
 | --- | --- |
+| #2 | `PLANO_DE_TRABALHO.md` (Passo 0 — plano/roteiro pessoal, não é entregável) |
 | #3 | Skill `analyze-codebase` + `ANALIZE_CODEBASE.md` (mapa do código existente) |
 | #4 | Skill `summarize-meeting-transcript` + `RESUMO_TRANSCRICAO.md` (resumo estruturado da reunião) |
 | #5 | Skill `write-adrs` + 7 ADRs em `docs/adrs/` |
