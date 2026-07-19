@@ -94,7 +94,7 @@ Mapeia cada item registrado nos documentos do pacote (ADRs, RFC, FDD e PRD) à s
 | PRD-FR-11 | docs/PRD.md | Requisito Funcional | Garantia at-least-once com identificador único por evento para dedup do cliente | TRANSCRICAO | [09:24–09:26] Diego |
 | PRD-NFR-01 | docs/PRD.md | Requisito Não Funcional | Latência de entrega: p95 até 10s, pior caso ~12s | TRANSCRICAO | [09:02] Marcos |
 | PRD-NFR-02 | docs/PRD.md | Requisito Não Funcional | Nenhum evento perdido silenciosamente — sempre observável e reprocessável | TRANSCRICAO | [09:18] Diego |
-| PRD-NFR-03 | docs/PRD.md | Requisito Não Funcional | Apenas URLs https são aceitas para webhooks | TRANSCRICAO | [09:23] Sofia |
+| PRD-NFR-03 | docs/PRD.md | Requisito Não Funcional | Secret de assinatura é exclusiva por webhook, não compartilhada entre clientes | TRANSCRICAO | [09:21] Sofia |
 | PRD-NFR-04 | docs/PRD.md | Requisito Não Funcional | Secret anterior válida por 24h após rotação (grace period) | TRANSCRICAO | [09:21] Sofia |
 | PRD-NFR-05 | docs/PRD.md | Requisito Não Funcional | Payload de notificação limitado a 64KB, erro explícito se ultrapassar | TRANSCRICAO | [09:23–09:24] Sofia |
 | PRD-NFR-06 | docs/PRD.md | Requisito Não Funcional | Reprocessamento manual de DLQ deve ficar auditável (quem executou) | TRANSCRICAO | [09:35–09:36] Sofia |

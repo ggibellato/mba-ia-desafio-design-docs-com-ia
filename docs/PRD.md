@@ -77,7 +77,7 @@ Onze requisitos funcionais identificados na reunião — acima do mínimo de 8 e
 
 - **[NFR-01] Latência de entrega**: p95 de até 10 segundos entre a mudança de status e a primeira tentativa de entrega, refletindo a definição de "tempo real" dos clientes (`[09:02]`); no pior caso operacional (2s de polling + até 10s de timeout de chamada), a primeira tentativa pode levar até ~12s (ADR-002, `[09:42]`).
 - **[NFR-02] Confiabilidade de entrega**: nenhum evento é perdido silenciosamente — todo evento que esgota as tentativas de retry fica em um estado observável e reprocessável (DLQ), nunca é simplesmente descartado (ADR-003).
-- **[NFR-03] Segurança de transporte e autenticação**: apenas URLs `https` são aceitas; toda notificação é assinada com HMAC-SHA256; cada webhook tem secret própria, não compartilhada entre clientes (`[09:21–09:23]`).
+- **[NFR-03] Isolamento de secret por cliente**: a secret usada para assinar notificações (FR-08) é exclusiva de cada webhook, não compartilhada entre clientes — um vazamento em um endpoint não compromete a autenticidade das notificações dos demais clientes (`[09:21]`).
 - **[NFR-04] Continuidade na rotação de secret**: a secret anterior permanece válida por 24h após uma rotação, para o cliente migrar sem downtime de validação (`[09:21]`).
 - **[NFR-05] Tamanho de payload**: notificações são limitadas a 64KB; eventos que ultrapassarem esse limite não são enviados truncados — geram erro explícito (`[09:23–09:24]`).
 - **[NFR-06] Auditabilidade de operações administrativas**: todo reprocessamento manual de evento na DLQ deve ficar registrado, com identificação de quem executou a ação (`[09:35–09:36]`).
