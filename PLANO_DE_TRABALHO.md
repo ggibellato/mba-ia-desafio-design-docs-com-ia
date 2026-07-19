@@ -110,13 +110,13 @@ Produzido por último entre os grandes docs — deve ser consolidação do que j
 
 Por último, quando o processo estiver completo.
 
-- [ ] **Sobre o desafio**: 1–2 parágrafos com suas palavras.
-- [ ] **Ferramentas de IA utilizadas**: lista com papel de cada uma.
-- [ ] **Workflow adotado**: ordem de produção dos documentos, como organizou a interação com a IA.
-- [ ] **Prompts customizados**: ≥2 prompts relevantes, em blocos de código.
-- [ ] **Iterações e ajustes**: ≥2 momentos concretos em que a IA errou/foi superficial e você corrigiu; quantas iterações principais até o resultado final.
-- [ ] **Como navegar a entrega**: caminho dos arquivos e ordem sugerida de leitura.
-- [ ] Opcional: manter link/seção referenciando o enunciado original (`EXERCICIO.md`).
+- [x] **Sobre o desafio**: 1–2 parágrafos com suas palavras.
+- [x] **Ferramentas de IA utilizadas**: lista com papel de cada uma. (3 itens: Claude Code, skills customizadas, CLAUDE.md)
+- [x] **Workflow adotado**: ordem de produção dos documentos, como organizou a interação com a IA. (tabela com os 7 PRs de documentação)
+- [x] **Prompts customizados**: ≥2 prompts relevantes, em blocos de código. (2 blocos: analyze-codebase e write-adrs)
+- [x] **Iterações e ajustes**: ≥2 momentos concretos em que a IA errou/foi superficial e você corrigiu; quantas iterações principais até o resultado final. (6 correções concretas, 7 ciclos principais)
+- [x] **Como navegar a entrega**: caminho dos arquivos e ordem sugerida de leitura. (11 itens, todos os links conferidos)
+- [x] Opcional: manter link/seção referenciando o enunciado original (`EXERCICIO.md`). (link no topo do README)
 
 ## Fase 8 — Revisão final contra os critérios de aceite
 
