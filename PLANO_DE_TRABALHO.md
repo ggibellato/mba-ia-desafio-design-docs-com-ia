@@ -122,15 +122,15 @@ Por último, quando o processo estiver completo.
 
 Passar item a item pela checklist de "Critérios de Aceite" do `EXERCICIO.md` (seção completa) antes do push final. Pontos de atenção especial:
 
-- [ ] Nenhum requisito/decisão/restrição nos documentos contradiz a transcrição ou o código.
-- [ ] Nenhum arquivo de código citado nos documentos é inexistente no repositório real (conferir cada caminho citado com `ls`/busca).
-- [ ] Itens explicitamente descartados na reunião NÃO aparecem como requisito em nenhum documento.
-- [ ] Estrutura de pastas confere com a estrutura obrigatória do entregável.
+- [x] Nenhum requisito/decisão/restrição nos documentos contradiz a transcrição ou o código.
+- [x] Nenhum arquivo de código citado nos documentos é inexistente no repositório real (conferir cada caminho citado com `ls`/busca).
+- [x] Itens explicitamente descartados na reunião NÃO aparecem como requisito em nenhum documento.
+- [x] Estrutura de pastas confere com a estrutura obrigatória do entregável.
 
 ## Fase 9 — Push final
 
-- [ ] Commit e push para o fork público no GitHub.
-- [ ] Conferir que o repositório está público.
+- [x] Commit e push para o fork público no GitHub.
+- [x] Conferir que o repositório está público.
 
 ---
 
