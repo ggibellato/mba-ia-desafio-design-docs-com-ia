@@ -5,7 +5,9 @@ description: Produces `docs/FDD.md` with an implementation-oriented Feature Desi
 
 # Write FDD
 
-Creates a detailed Feature Design Document at `docs/FDD.md` describing **how to implement** the feature. The FDD is the most technical document in the set: it must be actionable enough that a developer can read it and start coding. It is derived from higher-level documents (PRD, RFC, ADRs, meeting summaries) but focuses on concrete flows, contracts, error handling, resilience, observability, dependencies, and integration with existing code.
+Creates a detailed Feature Design Document at `docs/FDD.md` describing **how to implement** the feature. The FDD is the most technical document in the set: it must be actionable enough that a developer can read it and start coding. It is derived from higher-level documents (PRD, RFC, ADRs, meeting summaries) but focuses on concrete flows, contracts, error handling, resilience, observability, dependencies, and integration with existing code. [linkedin](https://www.linkedin.com/pulse/anatomy-effective-technical-design-document-rashedul-islam-1vsuc)
+
+This skill is **feature-agnostic**: it works for webhook/outbox/DLQ pipelines, order state changes, background jobs, UI features, or any other type of feature, as long as the input provides enough context.
 
 ## INPUT
 
@@ -14,19 +16,22 @@ Free-form. The skill infers what was passed. Any combination works:
 - Problem and feature context:
   - Natural-language description, PRD, RFC, or meeting summary that defines what this feature must do.
 - Design decisions:
-  - ADRs (`docs/adrs/ADR-*.md`), RFCs (`docs/RFC.md`), notes about chosen patterns (outbox, DLQ, retries, etc.).
+  - ADRs (`docs/adrs/ADR-*.md`), RFCs (`docs/RFC.md`), notes about chosen patterns (e.g., outbox, queues, schedulers, background workers, caching).
 - Codebase and module paths:
-  - Project root or relevant modules, e.g. `.`, `src/`, `services/webhooks/`, `backend/orders/`, etc.
+  - Project root or relevant modules, e.g. `.`, `src/`, `services/orders/`, `backend/webhooks/`, etc.
 - Environment:
-  - Information about existing infrastructure (queues, databases, HTTP APIs).
+  - Information about existing infrastructure (queues, databases, HTTP APIs, message buses).
 
 Optional overrides:
 
 - Different FDD path:
   - “Write to `docs/fdd/webhooks.md` instead of `docs/FDD.md`.”
 - Project type:
-  - “This is a greenfield project” (no existing system), or
+  - “This is a greenfield project” (no existing system), or  
   - “This is an existing system; integrate with modules X/Y/Z.”
+- Domain hints:
+  - “This feature is about notifying clients on order status changes via webhooks and DLQ.”  
+  - “This feature is a batch import pipeline.”  
 
 If the skill cannot infer the feature’s behavior and responsibilities from the input, it should abort with:
 
@@ -39,9 +44,9 @@ A single file (by default `docs/FDD.md`) containing a technical, implementation-
 - Context and technical motivation  
 - Technical objectives  
 - Scope and exclusions  
-- Detailed flows (including outbox creation, worker processing, retries, DLQ)  
-- Public contracts (HTTP endpoints with example payloads, headers, status codes, semantics)  
-- Error matrix (with error codes in the `WEBHOOK_*` pattern)  
+- Detailed flows (for the feature’s main processing pipeline: e.g., event creation, background processing, retries, dead-letter handling, etc.)  
+- Public contracts (e.g., HTTP endpoints with example payloads, headers, status codes, semantics; or other external interfaces)  
+- Error matrix (with feature-specific error codes; in this project, webhooks can use a `WEBHOOK_*` pattern, but the skill must adapt to the current domain)  
 - Resilience strategies (timeouts, retries, backoff, fallback)  
 - Observability (metrics, logs, tracing)  
 - Dependencies and compatibility  
@@ -50,12 +55,12 @@ A single file (by default `docs/FDD.md`) containing a technical, implementation-
 - If the project is **not** greenfield:  
   - **Integration with existing system** section, with real file paths and module names.
 
-The FDD should be concrete enough that a developer can:
+The FDD should be concrete enough that a developer can: [atlassian](https://www.atlassian.com/work-management/knowledge-sharing/documentation/software-design-document)
 
 - Understand the end-to-end flow.  
-- See exactly which endpoints to implement and what they accept/return.  
+- See exactly which interfaces to implement and what they accept/return.  
 - Know how errors are represented and handled.  
-- Know which modules, files, and patterns to modify or extend in an existing codebase. [atlassian](https://www.atlassian.com/work-management/knowledge-sharing/documentation/software-design-document)
+- Know which modules, files, and patterns to modify or extend in an existing codebase.
 
 ***
 
@@ -73,11 +78,13 @@ Parse the input and extract:
   - Paths where the feature lives or will live.  
 - **Project type** (if stated):
   - Greenfield vs. existing system.  
+- **Domain hints**:
+  - For example, “order status notifications via webhooks/outbox/DLQ”.
 
 Determine target FDD path:
 
 - Default: `docs/FDD.md`.  
-- If an override path is provided, use it instead.  
+- If an override path is provided, use it instead.
 
 If `docs/` (or the overridden directory) does not exist and cannot be created, abort with a clear message.
 
@@ -92,11 +99,11 @@ When paths are provided, load:
 - **RFC** (`docs/RFC.md`):
   - For architecture-level proposal, constraints, alternatives, and risks.  
 - **ADRs** (`docs/adrs/ADR-*.md`):
-  - For specific decisions that affect implementation (outbox pattern, error handling, storage choices, etc.). [adr.github](https://adr.github.io/adr-templates/)
+  - For specific decisions that affect implementation (e.g., outbox pattern, error handling, storage choices). [adr.github](https://adr.github.io/adr-templates/)
 - **Meeting summary / transcript summary**:
   - For closed decisions and functional requirements, especially around flows and error scenarios.  
 - **Existing code** (non-greenfield):
-  - Modules that will be extended or integrated (e.g., `src/orders/order-service.ts`, `src/webhooks/dispatcher.ts`).
+  - Modules that will be extended or integrated (e.g., `src/orders/order-service.ts`, `src/notifications/webhook-dispatcher.ts`).
 
 Use these as constraints and guides for the FDD; do not repeat RFC content verbatim.
 
@@ -107,6 +114,7 @@ From the input and code inspection, determine:
 - **Greenfield**:
   - No existing implementation; paths may not exist yet.  
   - The FDD defines new modules and files to create.  
+
 - **Existing system**:
   - There are modules, services, or flows already in place.  
   - The feature extends, modifies, or integrates with them.
@@ -120,117 +128,120 @@ If it is **not** clearly greenfield, treat it as an existing system and:
 
 From context (PRD, RFC, ADRs, meetings) and code (if present), derive:
 
-4.1 **Context and technical motivation**
+#### 4.1 Context and technical motivation
 
 - Why this feature exists from a technical point of view:
-  - Technical problems being solved (e.g., unreliable webhook delivery).  
-  - Constraints (throughput, latency, consistency, existing interfaces).  
+  - Technical problems being solved (e.g., unreliable notifications, missing audit trail, slow batch process).  
+  - Constraints (throughput, latency, consistency, existing interfaces).
 
-4.2 **Technical objectives**
+#### 4.2 Technical objectives
 
 - Clear, technical goals:
-  - Reliability objectives (e.g., at-least-once delivery, idempotency).  
+  - Reliability objectives (e.g., at-least-once delivery, idempotency, correctness).  
   - Performance and scalability targets (where known).  
-  - Operability and maintainability goals.
+  - Operability and maintainability goals (simplicity, testability, isolation).
 
-4.3 **Scope and exclusions**
+#### 4.3 Scope and exclusions
 
-- In-scope:
+- **In-scope**:
   - Specific behaviors, surfaces, and components to be implemented.  
-- Out-of-scope:
+- **Out-of-scope**:
   - Related but explicitly excluded features or use cases.
 
-4.4 **Detailed flows**
+#### 4.4 Detailed flows
 
-Especially for webhook/outbox-like systems, describe end-to-end flows in detail: [youtube](https://www.youtube.com/shorts/vdx4-z5CoBk)
+Describe end-to-end flows in detail for the feature’s core processing path. [docsie](https://www.docsie.io/solutions/templates/technical/system-design-document/)
 
-- **Outbox event creation**:
-  - When and where events are created (e.g., inside transactional boundaries).  
-  - Data captured in outbox records.  
-- **Worker processing**:
-  - How workers load events, send webhooks, and mark success/failure.  
-  - Ordering, concurrency, and batching behavior.  
-- **Retry logic**:
-  - Retry schedule, max attempts, idempotency considerations.  
-- **Dead-letter queue (DLQ)**:
-  - When events are moved to DLQ.  
-  - How DLQ entries are inspected and remediated.
+Examples (adapt to the current feature):
+
+- For **event-driven / webhook / outbox** features:
+  - Event creation in a transaction or domain operation.  
+  - Background processing (workers, schedulers, queues).  
+  - Retry logic and dead-letter handling.  
+
+- For **HTTP APIs**:
+  - Request handling sequence, validation, business logic, persistence, side-effects.  
+
+- For **batch jobs**:
+  - Input acquisition, processing stages, failure handling, completion criteria.
 
 These flows should be detailed enough to inform implementation and tests (pseudocode, sequence steps, or sequence diagrams are acceptable).
 
-4.5 **Public contracts**
+#### 4.5 Public contracts
 
-Define the external interfaces:
+Define the external interfaces used or exposed by this feature: [gist.github](https://gist.github.com/theKindCoder/61629becbb132051f95c78e97e8b55ff)
 
-- **HTTP endpoints**:
+- **HTTP endpoints** (if applicable):
   - Paths, methods, query parameters.  
   - Request payloads with concrete examples (JSON bodies, headers).  
   - Response payloads, status codes, and semantics (e.g., what 200 vs 202 vs 4xx vs 5xx mean).  
-- **Webhook payloads** (if relevant):
-  - Event structures, required/optional fields.  
-  - Headers and signature/auth mechanisms. [mgsoftware](https://www.mgsoftware.nl/en/templates/technical-specification-template)
 
-4.6 **Error matrix (`WEBHOOK_*` codes)**
+- Other types of contracts, as applicable:
+  - Message formats on queues/topics.  
+  - Webhook payloads.  
+  - CLI or scheduled job interfaces.
+
+#### 4.6 Error matrix (feature-specific codes)
 
 Define a matrix of expected errors:
 
 - Each row should contain:
-  - Error code (e.g., `WEBHOOK_TIMEOUT`, `WEBHOOK_INVALID_PAYLOAD`, `WEBHOOK_DESTINATION_4XX`).  
+  - Error code (consistent with the project’s naming conventions; e.g.: WEBHOOK project, that might be `WEBHOOK_TIMEOUT`, `WEBHOOK_INVALID_PAYLOAD`, etc., but in other projects use appropriate prefixes).  
   - HTTP status (if applicable).  
   - Description and cause.  
   - Where it is raised (which component/endpoint).  
   - How it should be handled or surfaced.
 
-Ensure codes follow the `WEBHOOK_*` naming pattern consistently.
+The skill must **not** hardcode `WEBHOOK_*` as a universal pattern; it should adapt to the feature’s domain and existing conventions when available.
 
-4.7 **Resilience strategies**
+#### 4.7 Resilience strategies
 
-Describe how the system remains robust: [solarwinds](https://www.solarwinds.com/blog/sustaining-digital-resilience-with-secure-by-design)
+Describe how the system remains robust: [saas-billing-architecture](https://www.saas-billing-architecture.com/webhook-processing-backend-state-management/webhook-retry-timeout-strategies/)
 
 - **Timeouts**:
-  - Default timeouts for outbound calls, and justification.  
+  - Default timeouts for outbound calls or long operations, and justification.  
 - **Retries and backoff**:
   - Retry policy (fixed, exponential backoff), max attempts, jitter.  
 - **Fallbacks**:
   - Alternative paths, degraded modes, or manual intervention strategies.  
-- **Circuit breakers / rate limits** (if applicable):
+- **Circuit breakers / rate limits / bulkheads** (if applicable):
   - How to protect downstream systems and your own infrastructure.
 
-4.8 **Observability**
+#### 4.8 Observability
 
 Specify how the feature will be observed in production: [dev](https://dev.to/adeolu102/engineering-design-document-reusable-observability-platform-v2-54gb)
 
 - **Metrics**:
-  - Key counters and gauges (e.g., delivered events, failed events, DLQ entries, latency).  
+  - Key counters and gauges (e.g., processed items, failures, DLQ entries, latency).  
 - **Logs**:
   - Log structure, log levels for different conditions, correlation IDs.  
 - **Tracing**:
-  - Spans for key operations (event creation, dispatch, retry, DLQ move).  
-  - Propagation of trace context through HTTP calls.
+  - Spans for key operations (e.g., event creation, dispatch, retry, DLQ move, or the equivalent in the current feature).  
+  - Propagation of trace context through calls.
 
-4.9 **Dependencies and compatibility**
+#### 4.9 Dependencies and compatibility
 
 Enumerate:
 
-- External services, databases, queues, libraries.  
+- External services, databases, queues, libraries, APIs.  
 - Version compatibility and migration concerns.  
 - Any impact on existing consumers (e.g., compatible changes vs. breaking changes).
 
-4.10 **Technical acceptance criteria**
+#### 4.10 Technical acceptance criteria
 
 Define concrete, testable criteria:
 
 - What must be true for the implementation to be considered “done”:
   - Functional acceptance (scenarios that must pass).  
   - Non-functional criteria (latency thresholds, error budgets, throughput).  
-  - Testing requirements (unit, integration, end-to-end tests, load tests).
+  - Testing requirements (unit, integration, end-to-end tests, load/soak tests).
 
-4.11 **Risks and mitigation**
+#### 4.11 Risks and mitigation
 
 List:
 
-- Implementation risks (complexity, unknowns).  
-- Operational risks (incident profiles, failure modes).  
+- Implementation risks (complexity, unknowns, new technology).  
+- Operational risks (incident profiles, failure modes, regressions).  
 - Proposed mitigation strategies (phased rollout, feature flags, kill switches, fallback behavior).
 
 ### Step 5: Integration with Existing System (Non-Greenfield)
@@ -282,42 +293,17 @@ Compose `docs/FDD.md` with at least this structure:
 
 ## Detailed Flows
 
-### Outbox Event Creation
-
-<Step-by-step description or sequence diagram of how and when outbox events are created.>
-
-### Worker Processing
-
-<How workers fetch, process, and mark events; concurrency, ordering, batching.>
-
-### Retry Logic
-
-<Retry policy, idempotency strategy, error handling on retry.>
-
-### Dead-Letter Queue (DLQ)
-
-<Conditions for DLQ, structure of DLQ entries, remediation processes.>
+<Describe the end-to-end flows relevant to this feature: event pipelines, request/response flows, background jobs, retries, DLQs, or their equivalents in this domain.>
 
 ## Public Contracts
 
-### HTTP Endpoints
+<Describe external interfaces: HTTP endpoints, message formats, webhooks, CLI, etc., with examples.>
 
-- `POST /...`  
-  - Request body (example)  
-  - Required headers  
-  - Response status codes and payloads  
-  - Semantics
+## Error Matrix
 
-### Webhook Payloads (if applicable)
-
-<Describe payload format, headers, authentication/signature, and examples.>
-
-## Error Matrix (`WEBHOOK_*`)
-
-| Code               | HTTP Status | Description                      | Where Raised                  | Handling Strategy        |
-|--------------------|------------|----------------------------------|-------------------------------|--------------------------|
-| `WEBHOOK_TIMEOUT`  | 504        | ...                              | <component or endpoint>       | <retry / DLQ / log etc.> |
-| `WEBHOOK_INVALID_PAYLOAD` | 400 | ...                              | <component or endpoint>       | ...                      |
+| Code          | HTTP Status | Description                      | Where Raised              | Handling Strategy         |
+|--------------|------------|----------------------------------|---------------------------|---------------------------|
+| <ERROR_CODE> | <status>   | <what it means>                  | <component or endpoint>   | <retry / DLQ / log etc.> |
 
 ## Resilience Strategies
 
@@ -361,7 +347,7 @@ Compose `docs/FDD.md` with at least this structure:
 - <Risk 2> — <mitigation>
 ```
 
-You can optionally include diagrams (system, sequence, state, data layout) in the Detailed Flows or Observability sections when they clarify complex behavior, but they are not required.
+You can optionally include diagrams (system, sequence, state, data layout) in the **Detailed Flows** or relevant sections when they clarify complex behavior, but they are not required.
 
 ### Step 7: Save FDD
 
@@ -380,14 +366,14 @@ Otherwise, ask whether to replace or version it.
 **Always:**
 
 - Produce an implementation-oriented FDD detailed enough for a developer to start coding.  
-- Include, at minimum: Context and technical motivation; Technical objectives; Scope and exclusions; Detailed flows; Public contracts; Error matrix with `WEBHOOK_*` codes; Resilience strategies; Observability; Dependencies and compatibility; Technical acceptance criteria; Risks and mitigation. [linkedin](https://www.linkedin.com/pulse/anatomy-effective-technical-design-document-rashedul-islam-1vsuc)
-- For non-greenfield projects, include **“Integration with existing system”** with real file paths and modules.  
+- Include, at minimum: Context and technical motivation; Technical objectives; Scope and exclusions; Detailed flows; Public contracts; Error matrix; Resilience strategies; Observability; Dependencies and compatibility; Technical acceptance criteria; Risks and mitigation. [linkedin](https://www.linkedin.com/pulse/anatomy-effective-technical-design-document-rashedul-islam-1vsuc)
+- For non-greenfield projects, include **“Integration with existing system”** with real file paths and modules.
 
 **Never:**
 
-- Leave flows vague or purely conceptual; they must be specific and actionable.  
-- Omit the error matrix or use inconsistent error code naming.  
+- Leave core flows vague or purely conceptual; they must be specific and actionable.  
+- Omit the error matrix or use inconsistent error code naming within the same project.  
 - Invent code paths or modules that do not exist (for existing systems); if unsure, state the limitation.  
 - Duplicate the RFC’s high-level rationale without adding concrete implementation detail.
 
-If you’d like, we can next wire this skill explicitly to consume your meeting summary and RFC outputs so that the three documents line up cleanly (summary → RFC → FDD + ADRs).
+With this version you can still fully describe “notify clients about order status changes using outbox + webhooks + DLQ”, but the skill also works for any other feature in other projects.
