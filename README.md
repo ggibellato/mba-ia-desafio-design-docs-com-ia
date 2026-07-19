@@ -10,13 +10,22 @@ A restrição mais importante do desafio não é técnica, é de disciplina: tod
 
 ## Ferramentas de IA utilizadas
 
-- **Claude Code** (CLI agêntico, rodando Claude Sonnet 5) — ferramenta principal de produção. Leu a transcrição e o código-fonte diretamente do repositório, executou comandos de shell para verificar fatos (`grep`, `find`, leitura de arquivos com números de linha) antes de citá-los nos documentos, e geriu todo o fluxo de branches/commits/PRs via `gh` CLI.
-- **Skills customizadas** (`.claude/skills/`, invocadas como slash commands) — um prompt reutilizável e estruturado por tipo de documento, cada um com regras explícitas de anti-alucinação ("não invente caminho de código", "priorize precisão sobre completude", "se a origem for ambígua, deixe de fora em vez de inventar"): `analyze-codebase`, `summarize-meeting-transcript`, `write-adrs`, `write-rfc`, `write-fdd`, `write-prd`, `write-tracker`.
-- **`CLAUDE.md`** na raiz do repositório — funciona como um "prompt de sistema" do projeto: força saída em português brasileiro por padrão, define estilo de escrita e a ordem de precedência das regras, e vale para todas as skills acima.
+Usei três IAs diferentes, cada uma com um papel específico no pipeline — decisão deliberada para não depender de um único modelo/contexto e chegar a um resultado mais genérico e robusto, em vez de deixar uma única IA "viciar" a skill e o prompt no contexto específico desta conversa:
+
+- **Perplexity** (https://www.perplexity.ai/) — usado para **desenhar cada skill** (`.claude/skills/*/SKILL.md`). Para cada documento, enviei um prompt descrevendo o objetivo e colando os requisitos mínimos extraídos do `EXERCICIO.md`. Depois de algumas iterações simples corrigindo detalhes — o problema mais recorrente era a skill sair específica demais para este projeto — cheguei a uma versão genérica, reutilizável em outro projeto/feature, não amarrada a "webhooks".
+- **ChatGPT** (https://chatgpt.com/) — usado para **organizar o prompt de execução** antes de rodar cada skill. Com prompts simples, montava e revisava o texto que depois seria colado como argumento do slash command no Claude (ordem de prioridade das fontes, regras específicas do desafio), garantindo que o pedido para o Claude chegasse já estruturado.
+- **Claude Code** (CLI agêntico, rodando Claude Sonnet 5) — ferramenta de **execução final**. Recebe a skill (vinda do Perplexity) e o prompt já organizado (vindo do ChatGPT) como argumento do slash command, lê a transcrição e o código-fonte diretamente do repositório, executa comandos de shell para verificar fatos (`grep`, `find`, leitura de arquivos com números de linha) antes de citá-los nos documentos, produz o arquivo final, e geriu todo o fluxo de branches/commits/PRs via `gh` CLI.
+- **`CLAUDE.md`** na raiz do repositório — funciona como um "prompt de sistema" do projeto: força saída em português brasileiro por padrão, define estilo de escrita e a ordem de precedência das regras, e vale para todas as skills executadas pelo Claude Code.
 
 ## Workflow adotado
 
-Segui a ordem sugerida no enunciado (ADRs → RFC → FDD → PRD → Tracker → README), mas com duas adaptações práticas:
+Segui a ordem sugerida no enunciado (ADRs → RFC → FDD → PRD → Tracker → README). Antes de cada skill ser executada, o pedido passava por um pipeline de 3 etapas, cada uma em uma IA diferente (ver "Ferramentas de IA utilizadas" acima):
+
+1. **Perplexity** desenha/ajusta a skill correspondente ao documento (ex.: `write-prd`).
+2. **ChatGPT** organiza o prompt de execução daquela skill para este desafio específico.
+3. **Claude Code** recebe o prompt organizado como argumento do slash command (`/write-prd ...`) e produz o arquivo.
+
+Além desse pipeline, usei duas adaptações práticas:
 
 1. **Um plano de trabalho pessoal** (`PLANO_DE_TRABALHO.md`, não é entregável do desafio) — um roteiro fase a fase com checklist e uma tabela "Log de Atividades" registrando, para cada invocação de skill, o horário e o prompt exato usado. Foi o que tornou possível reconstruir com precisão as seções abaixo.
 2. **Tracker construído incrementalmente, não só no fim** — em vez de varrer todos os documentos prontos de uma vez, atualizei `docs/TRACKER.md` a cada novo documento: ADRs + RFC juntos (48 linhas), depois FDD (+25 → 73), depois PRD (+29 → 102 no total), o que expôs cedo qualquer afirmação sem origem clara.
@@ -37,46 +46,58 @@ Cada PR passou por uma verificação factual antes do merge: conferir se cada ca
 
 ## Prompts customizados
 
-Dois exemplos representativos — o primeiro é um prompt curto e dirigido; o segundo é um prompt longo, com ordem de prioridade explícita entre fontes e regras anti-alucinação, no estilo dos "prompts do professor" mencionados no enunciado.
+Os três exemplos abaixo mostram o pipeline completo (Perplexity → ChatGPT → Claude Code) para um mesmo documento, o PRD.
 
-**1. Exploração inicial do código (`/analyze-codebase`):**
-
-```
-Pedir à IA uma exploração do código (`src/`, `prisma/schema.prisma`) para mapear:
-módulos existentes (auth, users, customers, products, orders), máquina de estados
-do pedido, controle de estoque, auditoria de mudanças de status, padrões de
-erro/exceções usados.
-```
-
-**2. Geração dos ADRs (`/write-adrs`), com ordem de prioridade entre fontes:**
+**1. Perplexity — pedido para desenhar a skill `write-prd`, colando os requisitos mínimos direto do `EXERCICIO.md`:**
 
 ```
+now I need a skill to write a PRD.md
+
+This is the requirements
+
+deve ser consolidação do que já foi decidido em ADRs/RFC/FDD.
+
+- [ ] Resumo e contexto da feature.
+- [ ] Problema e motivação.
+- [ ] Público-alvo e cenários de uso.
+- [ ] Objetivos e métricas de sucesso — **≥1 objetivo com métrica e meta quantitativa**.
+- [ ] Escopo (incluso e fora de escopo) — seção "Fora de escopo" com **≥2 itens**
+      explicitamente descartados/adiados na reunião.
+- [ ] Requisitos funcionais — **≥8 requisitos** discutidos na reunião.
+- [ ] Requisitos não funcionais.
+- [ ] Decisões e trade-offs principais.
+- [ ] Dependências.
+- [ ] Riscos e mitigação — **≥2 riscos**, cada um com probabilidade, impacto e mitigação.
+- [ ] Critérios de aceitação.
+- [ ] Estratégia de testes e validação.
+```
+
+Esse prompt passou por algumas iterações simples no próprio Perplexity — o problema mais comum era a skill sair específica demais para este projeto — até chegar numa versão genérica, reutilizável em outro projeto/feature.
+
+**2. ChatGPT — organização do prompt de execução daquela skill, antes de colar no Claude:**
+
+```
+/write-prd
+
 This is an MBA assignment.
 
-Your goal is to write the Architecture Decision Records (ADRs) required by the exercise.
+Your goal is to write the Product Requirements Document (PRD) required by the exercise.
 
 Use the following documents in order of priority:
 
-1. `EXERCICIO.md` — Defines the assignment requirements and grading criteria.
-   Your ADRs must satisfy all of these requirements.
-2. `TRANSCRICAO.md` — The primary source of truth for the architectural decisions
-   discussed. Do not invent decisions that are not supported by this document.
-3. `RESUMO_TRANSCRICAO.md` — A summary of the transcription that can be used for
-   navigation and context, but defer to TRANSCRICAO.md whenever there is ambiguity.
-4. `ANALIZE_CODEBASE.md` — Provides additional context about the implementation
-   and codebase. Use it to validate and enrich the ADRs, but do not let it
-   override the decisions documented in the transcription.
-
-When writing the ADRs:
-- Act as the software architect who participated in these decisions and is
-  documenting them after the fact.
-- Ensure every ADR is traceable to evidence in the transcription or the
-  codebase analysis.
-- Do not fabricate rationale, alternatives, or consequences that are
-  unsupported by the available information.
+1. `EXERCICIO.md` — Defines the assignment requirements and grading criteria. The FDD must satisfy all of these requirements.
+2. `TRANSCRIPTION.md` — The primary source of truth for the problem, context, discussions, constraints, and expected outcomes. Do not invent product requirements that are not supported by this document.
+3. `RESUMO_TRANSCRICAO.md` — A summary of the transcription for quick reference. If there is any conflict or ambiguity, `TRANSCRIPTION.md` takes precedence.
+4. `ADR-XXX-*.md` — Reference of architectural decisions already documented. Use them only to ensure consistency with the proposed solution.
+5. `RFC.md` — Reference of the architecture-level proposal. Use it only to ensure the documented requirements remain aligned with the proposed solution.
+6. `FDD.md` - Product Requirements Document
+6. `ANALIZE_CODEBASE.md` — Provides additional context about the existing implementation and codebase. Use it to validate and enrich the FDD where appropriate, but do not let it override the transcription, ADRs, or RFC.
+7. `TRACKER.md` — Reference of what has already been documented and completed.
 ```
 
-A `docs/TRACKER.md` na raiz do desafio guarda mais 6 prompts equivalentes (um por skill), com o texto exato usado em cada execução — inclui também um caso em que corrigi a própria skill no meio do processo (ver "Iterações e ajustes" abaixo).
+(Mantido como foi realmente usado, inclusive a numeração duplicada em "6." — o Claude recebeu exatamente esse texto como argumento do slash command.)
+
+**3. Claude Code — execução (`/write-prd`) com o prompt acima como argumento**, produzindo `docs/PRD.md` a partir da transcrição, do código e dos documentos já existentes. O texto completo, incluindo as instruções de "When writing the PRD" e "Process requirements" que também fazem parte desse prompt, está registrado verbatim em `PLANO_DE_TRABALHO.md` (tabela "Log de Atividades"), junto com os prompts equivalentes das outras 6 skills.
 
 ## Iterações e ajustes
 
@@ -84,7 +105,7 @@ O processo levou **7 ciclos principais** (um por documento/skill de produção, 
 
 1. **Erro factual de código em um ADR.** Um dos ADRs afirmou que `requireRole('ADMIN')` restringe hoje a *criação* de usuários. Ao pedir uma segunda checagem explícita de tudo que os ADRs afirmavam, a IA confirmou com `grep`/leitura direta que, na verdade, esse middleware protege `GET /users/:id` — não existe rota de criação de usuário nesse arquivo. Corrigido antes do merge.
 2. **Redundância entre requisito funcional e não funcional no PRD.** `FR-06` ("URL do webhook deve ser https") e `NFR-03` ("apenas URLs https são aceitas") diziam essencialmente a mesma coisa com palavras diferentes. Ao questionar se FR e NFR não deveriam ser mutuamente exclusivos, reescrevi `NFR-03` para focar no atributo de qualidade que ele deveria ter (isolamento de secret por cliente), em vez de repetir o fato já coberto por `FR-06`.
-3. **Skill genérica demais tratada como específica, depois generalizada.** A skill `write-fdd`, na primeira versão, tinha o padrão `WEBHOOK_*` embutido como se fosse universal — funcionava bem para este desafio, mas não seria reutilizável em outro projeto. Depois de generalizá-la, pedi para rodar de novo; em vez de regenerar o `docs/FDD.md` às cegas, a IA auditou seção por seção e confirmou que o conteúdo continuava correto, porque `EXERCICIO.md` (prioridade 1) já fixa esses detalhes especificamente para este projeto.
+3. **Skill genérica demais tratada como específica, depois generalizada.** A skill `write-fdd`, na primeira versão gerada no Perplexity, tinha o padrão `WEBHOOK_*` embutido como se fosse universal — funcionava bem para este desafio, mas não seria reutilizável em outro projeto. Depois de iterar no Perplexity para generalizá-la, atualizei o arquivo no repositório e pedi ao Claude Code para rodar de novo; em vez de regenerar o `docs/FDD.md` às cegas, o Claude auditou seção por seção e confirmou que o conteúdo continuava correto, porque `EXERCICIO.md` (prioridade 1) já fixa esses detalhes especificamente para este projeto.
 4. **Tradução literal que não soava natural.** Uma frase técnica no FDD usava "lançar" como verbo intransitivo ("se o passo 3 lançar") — tradução literal de "throws" que não faz sentido em português sem objeto. Corrigido primeiro para "lançar uma exceção", depois trocado para o termo em inglês ("throw") por preferência de estilo, já que é vocabulário técnico comum no dia a dia de quem vai ler o documento.
 5. **Log de prompts não fiel ao que foi realmente digitado.** A primeira versão da tabela "Log de Atividades" resumia/traduzia o prompt usado em vez de registrar o texto literal. Corrigido para guardar o argumento verbatim daquele ponto em diante — é o que tornou possível reproduzir os prompts customizados acima com exatidão.
 6. **Skill não reconhecida por erro de nome de arquivo.** Uma skill nova (`write-prd`) não aparecia na lista após `/reload-skills`. O arquivo estava salvo como `write-prd.md` em vez do nome exigido pela convenção do projeto, `SKILL.md` (o único padrão usado por todas as outras skills). Renomeado e a skill passou a carregar normalmente.
